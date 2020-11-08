@@ -15,9 +15,9 @@ with open('nn.pkl', 'rb') as output:
 
 myapp = Flask(__name__)
 
-
-
-input_v = Data.get_inputs_count("PRIVATE! Your 2003 Account Statement for shows 800 un-redeemed S. I. M. points. Call 08718738002 Identifier Code: 48922 Expires 21/11/04",unique_words)
+def predict(message, unique_words, nn):
+    input = Data.get_inputs_count(message, unique_words)
+    return round(nn.feedforward(input)[0,0])
 
 
 @myapp.route("/")
@@ -26,12 +26,13 @@ def hello():
 
 @myapp.route('/think', methods=['GET', 'POST'])
 def think2():
-    text = request.form['message']
     global unique_words
     global nn
     
-    result = round(nn.feedforward(input_v)[0,0])
-    if result == 0.0:
+    text = request.form['message']
+    result = predict(text, unique_words, nn)
+
+    if result == 0:
         result = 'ham'
     else: result = 'spam'
     return render_template('index.html', message=result)
